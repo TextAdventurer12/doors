@@ -81,4 +81,7 @@ class Ship
     // Display this ship. Automatically works out the size for square rooms to fit within the specified window
     // Relies on the generated room layout being correct and 2-D (ie stacking rooms is undefined behaviour)
     void Draw();
+
+  private:
+    void DrawDoor(Door *door, int x, int y, int height, int width);
 };

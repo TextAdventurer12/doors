@@ -192,75 +192,47 @@ void Ship::Draw()
     // draw the walls of the room
     DrawRectangleLines(x, y, r_width, r_height, WHITE);
 
+    double d_width = r_width * 0.4;
+    double d_height = r_height * 0.4;
+    
     // Draw doors on this room
     if (room->nDoor)
     {
-      // the size of doors is dependant on the scale of rooms
-      double d_width = r_width * 0.66;
-      double d_height = r_height * 0.2;
-      // shift the door into the middle of the wall
-      int x_door = x + (r_width - d_width) / 2;
-      int y_door = y - d_height / 2;
-      // draw the door
-      DrawRectangle(x_door, y_door, d_width, d_height, BLACK);
-      DrawRectangleLines(x_door, y_door, d_width, d_height, WHITE);
-      // shift the door's text to the middle of the door
-      int t_x = x + r_width/2 - d_height * 0.6;
-      int t_y = y_door + d_height * 0.1;
-      // draw the door's name
-      DrawText(room->nDoor->name.c_str(), t_x, t_y, d_height * 0.8, WHITE);
+      int d_x = x + (r_width - d_width) / 2;
+      int d_y = y - d_height / 2;
+      DrawDoor(room->nDoor, d_x, d_y, d_height, d_width);
     }
 
-    // largely a duplifate of the north door display
     if (room->sDoor)
     {
-      double d_width = r_width * 0.66;
-      double d_height = r_height * 0.2;
-      int x_door = x + (r_width - d_width) / 2;
-      int y_door = y - d_height / 2 + r_height;
-      DrawRectangle(x_door, y_door, d_width, d_height, BLACK);
-      DrawRectangleLines(x_door, y_door, d_width, d_height, WHITE);
-      int t_x = x + r_width/2 - d_height * 0.6;
-      int t_y = y_door + d_height * 0.1;
-      DrawText(room->sDoor->name.c_str(), t_x, t_y, d_height * 0.8, WHITE);
+      int d_x = x + (r_width - d_width) / 2;
+      int d_y = y + r_height - d_height / 2;
+      DrawDoor(room->sDoor, d_x, d_y, d_height, d_width);
     }
     
-
     if (room->eDoor)
     {
-      double d_width = r_width * 0.2;
-      double d_height = r_height * 0.66;
-      int x_door = x + r_width - d_width/2;
-      int y_door = y + (r_height - d_height)/2;
-      DrawRectangle(x_door, y_door, d_width, d_height, BLACK);
-      DrawRectangleLines(x_door, y_door, d_width, d_height, WHITE);
-      Font ft = GetFontDefault();
-      int t_x = x_door + d_height * 0.3;
-      int t_y = y_door + d_height * 0.1;
-      Vector2 pos = (Vector2){t_x, t_y};
-      float spacing = d_width * 0.8 / 10;
-      spacing = spacing < 1 ? 1 : spacing;
-      // rotate the displayed text on the door, to better fit inside the portrait rectangle
-      // TODO: swap to square doors, which will allow for right way up text regardless (fits with square rooms);
-      DrawTextPro(ft, room->eDoor->name.c_str(), pos, (Vector2){0, 0}, 90, d_width * 0.8, spacing, WHITE);
+      int d_x = x + r_width - d_width / 2;
+      int d_y = y + d_height / 2;
+      DrawDoor(room->eDoor, d_x, d_y, d_height, d_width);
     }
 
     if (room->wDoor)
     {
-      double d_width = r_width * 0.2;
-      double d_height = r_height * 0.66;
-      int x_door = x - d_width/2;
-      int y_door = y + (r_height - d_height)/2;
-      DrawRectangle(x_door, y_door, d_width, d_height, BLACK);
-      DrawRectangleLines(x_door, y_door, d_width, d_height, WHITE);
-      Font ft = GetFontDefault();
-      int t_x = x_door + d_height * 0.35;
-      int t_y = y_door + d_height * 0.3;
-      Vector2 pos = (Vector2){t_x, t_y};
-      float spacing = d_width * 0.8 / 10;
-      spacing = spacing < 1 ? 1 : spacing;
-      DrawTextPro(ft, room->wDoor->name.c_str(), pos, (Vector2){0, 0}, 90, d_width * 0.8, spacing, WHITE);
+      int d_x = x - d_width / 2;
+      int d_y = y + d_height / 2;
+      DrawDoor(room->wDoor, d_x, d_y, d_height, d_width);
     }
-
   }
 }
+
+void Ship::DrawDoor(Door *door, int x, int y, int height, int width)
+{
+  int fontSize = height * 0.8;
+  DrawRectangle(x, y, width, height, BLACK);
+  DrawRectangleLines(x, y, width, height, WHITE);
+  int t_x = x + 3;
+  int t_y = y + fontSize * 0.2;
+  DrawText(door->name.c_str(), t_x, t_y, fontSize, WHITE);
+}
+
