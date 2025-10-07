@@ -235,7 +235,7 @@ std::vector<Rectangle> Room::doorSpace()
   Rectangle east  = { x + 0.6, y + 0.3, eDoor ? 0.4 : 0, eDoor ? 0.4 : 0};
   Rectangle south = { x + 0.3, y + 0.6, sDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
   Rectangle west  = { x, y + 0.3,  wDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
-  return std::vector {north, east, south, west};
+  return std::vector<Rectangle> ({north, east, south, west});
 }
 
 Vector2 Ship::worldSpace(Vector2 roomSpace)

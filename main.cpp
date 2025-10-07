@@ -23,7 +23,7 @@ std::vector<std::string> split(std::string str, std::string delimeter)
   return tokens;
 }
 
-int floor(double x)
+int _floor(double x)
 {
   if (x == (double)(int)x) return x;
   return x > 0 ? (int)x : (int)(x - 1);
@@ -68,11 +68,11 @@ int main(int argc, char **argv)
     if (IsKeyDown(KEY_DOWN))
       guyPos.y += guySpeed;
 
-    if (floor(lastPos.x) != floor(guyPos.x)) guyPos.x = lastPos.x;
-    if (floor(lastPos.y) != floor(guyPos.y)) guyPos.y = lastPos.y;
+    if (_floor(lastPos.x) != _floor(guyPos.x)) guyPos.x = lastPos.x;
+    if (_floor(lastPos.y) != _floor(guyPos.y)) guyPos.y = lastPos.y;
 
-    Room *currRoom = sh.getRoom(floor(guyPos.x), floor(guyPos.y));
-    if (currRoom)
+    Room *currRoom = sh.getRoom(_floor(guyPos.x), _floor(guyPos.y));
+    if (0)
     {
       std::vector<Rectangle> doors = currRoom->doorSpace();
       printf("%f\n", doors[Ship::EAST].width);

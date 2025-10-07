@@ -7,6 +7,7 @@
 #include "raylib.h"
 #include <stdio.h>
 #include <iomanip>
+#include <sstream>
 
 // Store a state and identifier for doors between rooms.
 // Does not hold any identifying information for the rooms and position that this door is associated with
