@@ -48,6 +48,10 @@ class Room
 
     Room();
     Room(int x, int y);
+
+    // returns four rectangles to represent the collision boxes of doors in each direction
+    // the direction is mapped to doorSpace[Directions]
+    std::vector<Rectangle> doorSpace();
 };
 
 // Holds any handles allocation for a root node Room, alongside the ability to add new rooms and acces data
@@ -82,6 +86,13 @@ class Ship
     // Relies on the generated room layout being correct and 2-D (ie stacking rooms is undefined behaviour)
     void Draw();
 
+    // maps a point relative to a room to the point on the canvas
+    // (0, 0) is the top left of the root, with the top lefts of other rooms placed at integer (x, y)
+    Vector2 worldSpace(Vector2 roomSpace);
+
+    Room *getRoom(int x, int y);
+
   private:
     void DrawDoor(Door *door, int x, int y, int height, int width);
+    int x_min = 0, x_max = 0, y_min = 0, y_max = 0;
 };

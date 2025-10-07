@@ -17,8 +17,9 @@ Command::Command(std::vector<std::string> arguments)
 {
   // take the first argument to be the type of command
   std::string identifier = arguments[0];
-  arguments.erase(arguments.begin()); // erase the first argument
   type = getType(identifier); // identify the type from the alias
+  if (type != TYPE_DOOR)
+    arguments.erase(arguments.begin()); // erase the first argument
   this->arguments = arguments; // store arguments
 }
 
@@ -26,6 +27,8 @@ Command::Command(std::vector<std::string> arguments)
 int Command::getType(std::string name)
 {
   int type = TYPE_NONE; // default to TYPE_NONE (0)
+  if (isCode(name))
+    return TYPE_DOOR;
   // continue checking aliases until there are no types remaining
   for (type = 0; type < typeNames.size(); type++)
     if (typeNames[type] == name) // check if the provided name fits the alias
@@ -33,8 +36,20 @@ int Command::getType(std::string name)
   return TYPE_NONE; // if no aliases are found, it must be a NONE type
 }
 
+int isHexChar(char ch)
+{
+  return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z');
+}
 
-void Command::Process(Terminal &target)
+int Command::isCode(std::string name)
+{
+  if (name.size() != 2)
+    return 0;
+  return isHexChar(name[0]) && isHexChar(name[1]);
+}
+
+
+void Command::Process(Terminal &target, Ship &ship)
 {
   // Logic performed depends on the type of the command
   // Check for type and pass off to other Process functions for each type
@@ -51,6 +66,10 @@ void Command::Process(Terminal &target)
      case TYPE_ECHO:
        ProcessEcho(target);
        break;
+
+      case TYPE_DOOR:
+        ProcessDoor(ship);
+        break;
   }
   return;
 }
@@ -70,4 +89,16 @@ void Command::ProcessEcho(Terminal &target)
 {
   for (std::string str : arguments) // check each string in the stored arguments
     target.WriteLine(str); // repeat on a new line
+}
+
+void Command::ProcessDoor(Ship &target)
+{
+  for (Door *door : target.doorsArena)
+  {
+    if (door->name == arguments[0])
+    {
+      door->state = !door->state;
+      return;
+    }
+  }
 }

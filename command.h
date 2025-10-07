@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "terminal.h"
+#include "ship.h"
 
 class Command
 {
@@ -11,7 +12,8 @@ class Command
     {
       TYPE_NONE, // Default type (should not have attached logic)
       TYPE_JOKE, // Repeat a predefined line of text from code (debug command)
-      TYPE_ECHO  // Echo the provided parameters (debug command)
+      TYPE_ECHO, // Echo the provided parameters (debug command)
+      TYPE_DOOR, // Opens the door stored in arguments[0]
     };
     // string aliases for each command. The position of each alias corresponds to the integer value of the command's type
     static std::vector<std::string> typeNames;
@@ -24,8 +26,8 @@ class Command
     Command();
     // Construct a new command from the given arguments, with the first argument being used to identify the type of command
     Command(std::vector<std::string> arguments);
-    // Process a command and pass its output into target
-    void Process(Terminal &target);
+    // Process a command and pass its output into target or effect ship
+    void Process(Terminal &target, Ship &ship);
 
     // Process a command of type TYPE_NONE
     void ProcessNone(Terminal &target);
@@ -33,4 +35,8 @@ class Command
     void ProcessJoke(Terminal &target);
     // Process a command of type TYPE_ECHO
     void ProcessEcho(Terminal &target);
+    // Process a command of type TYPE_DOOR
+    void ProcessDoor(Ship &ship);
+  private:
+    static int isCode(std::string name);
 };

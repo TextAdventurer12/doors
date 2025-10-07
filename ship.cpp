@@ -65,6 +65,12 @@ void Ship::addRoom(Room *stem, int direction)
       x--;
       break;
   }
+  // update bounding boxes of this ship
+  x_min = std::min(x, x_min);
+  x_max = std::max(x, x_max);
+  y_min = std::min(y, y_min);
+  y_max = std::max(y, y_max);
+
   // Allocate and store references to memory
   Room *newRoom = new Room(x, y);
   roomArena.push_back(newRoom);
@@ -140,7 +146,9 @@ std::string Door::generateId()
   int id = rand() % 256; // random number from 0x00 to 0xff
   std::stringstream stream;
   stream << std::hex << id; // store as a hex string
-  return stream.str();
+  std::string str = stream.str();
+  for (char &ch : str) ch = ch + (ch >= 'a' && ch <= 'z' ? 'A' - 'a' : 0);
+  return str;
 }
 
 Ship::Ship(Vector2 topLeft, int width, int height)
@@ -154,43 +162,26 @@ Ship::Ship(Vector2 topLeft, int width, int height)
 
 void Ship::Draw()
 {
-  // identify the bounds of the ship.
-  // a default value of 0 will function for all correctly built ships, which contain a (0, 0) room
-  // However if there is no (0, 0) room somehow, this will yield incorrect bounds and break rendering
-  int x_min = 0;
-  int x_max = 0;
-  int y_min = 0;
-  int y_max = 0;
-  for (Room *room : roomArena)
-  {
-    x_min = std::min(x_min, room->x);
-    y_min = std::min(y_min, room->y);
-    x_max = std::max(x_max, room->x);
-    y_max = std::max(y_max, room->y);
-  }
-  // The dimensions of a rectangle that covers all rooms, along with one room of padding
-  double x_count = x_max - x_min + 3;
-  double y_count = y_max - y_min + 3;
+  // these could be calculated from world pos (and probably should be) but this functions fine and requires less changes
+  int r_width = width / (x_max - x_min + 3);
+  int r_height = height / (y_max - y_min + 3);
 
-  // split the width and height of the window into the number of rooms
-  double r_width = width / x_count;
-  double r_height = height / y_count;
-  // turn rooms into squares
+  // this is why calculated from world pos is probably better - if this behaviour changes it has to be changed here too
   r_width = std::min(r_width, r_height);
   r_height = std::min(r_width, r_height);
-
+  
   // draw a black background
   DrawRectangle(topLeft.x, topLeft.y, width, height, BLACK);
 
   // draw each room individually
   for (Room *room : roomArena)
   {
-    // generate a grid of cells, and draw the cells with rooms on top of them
-    int x = (room->x - x_min + 1) * r_width + topLeft.x;
-    int y = (room->y - y_min + 1) * r_height + topLeft.y;
+    Vector2 pos = worldSpace((Vector2){room->x, room->y});
+    int x = pos.x;
+    int y = pos.y;
 
     // draw the walls of the room
-    DrawRectangleLines(x, y, r_width, r_height, WHITE);
+    DrawRectangleLines(pos.x, pos.y, r_width, r_height, WHITE);
 
     double d_width = r_width * 0.4;
     double d_height = r_height * 0.4;
@@ -228,11 +219,51 @@ void Ship::Draw()
 
 void Ship::DrawDoor(Door *door, int x, int y, int height, int width)
 {
-  int fontSize = height * 0.8;
+  int fontSize = height * 0.7;
   DrawRectangle(x, y, width, height, BLACK);
-  DrawRectangleLines(x, y, width, height, WHITE);
-  int t_x = x + 3;
-  int t_y = y + fontSize * 0.2;
+  DrawRectangleLines(x, y, width, height, door->state ? RED : GREEN);
+  int t_width = MeasureText(door->name.c_str(), fontSize);
+  int t_x = x + width/2 - t_width / 2;
+  int t_y = y + (height - fontSize)/2;
   DrawText(door->name.c_str(), t_x, t_y, fontSize, WHITE);
 }
 
+
+std::vector<Rectangle> Room::doorSpace()
+{
+  Rectangle north = { x + 0.3, y, nDoor ? 0.4 : 0, nDoor ? 0.4 : 0};
+  Rectangle east  = { x + 0.6, y + 0.3, eDoor ? 0.4 : 0, eDoor ? 0.4 : 0};
+  Rectangle south = { x + 0.3, y + 0.6, sDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
+  Rectangle west  = { x, y + 0.3,  wDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
+  return std::vector {north, east, south, west};
+}
+
+Vector2 Ship::worldSpace(Vector2 roomSpace)
+{
+  // identify the bounds of the ship.
+  // a default value of 0 will function for all correctly built ships, which contain a (0, 0) room
+  // However if there is no (0, 0) room somehow, this will yield incorrect bounds and break rendering
+  // The dimensions of a rectangle that covers all rooms, along with one room of padding
+  double x_count = x_max - x_min + 3;
+  double y_count = y_max - y_min + 3;
+
+  // split the width and height of the window into the number of rooms
+  double r_width = width / x_count;
+  double r_height = height / y_count;
+  // turn rooms into squares
+  r_width = std::min(r_width, r_height);
+  r_height = std::min(r_width, r_height);
+
+  float x = (roomSpace.x - x_min + 1) * r_width + topLeft.x;
+  float y = (roomSpace.y - y_min + 1) * r_height + topLeft.y;
+
+  return (Vector2) {x, y};
+}
+
+Room *Ship::getRoom(int x, int y)
+{
+  for (Room *room : roomArena)
+    if (room->x == x && room->y == y)
+      return room;
+  return NULL;
+}

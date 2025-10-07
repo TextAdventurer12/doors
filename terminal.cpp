@@ -1,19 +1,13 @@
 #include "terminal.h"
 
-// create a new terminal with some default parameters
 Terminal::Terminal()
 {
-  currentLine = "";
-  cols = 80;
-  rows = 20;
-  fontSize = 12;
-  interrupt = 0;
 }
 
-Terminal::Terminal(Vector2 topLeft, int cols, int rows, int fontSize)
+Terminal::Terminal(Vector2 topLeft, int width, int rows, int fontSize)
 {
   this->topLeft = topLeft;
-  this->cols = cols;
+  this->width = width;
   this->rows = rows;
   this->fontSize = fontSize;
   currentLine = "";
@@ -43,7 +37,8 @@ void Terminal::Update(int key)
   if ((key >= KEY_APOSTROPHE && key <= KEY_GRAVE) || key == KEY_SPACE)
   {
     // only allow for inputs up to the maximum size of the terminal
-    if (currentLine.size() >= cols)
+    // Adds some extra padding to ensure the last character doesn't go past the edge of the window
+    if (MeasureText(currentLine.c_str(), fontSize) >= width - fontSize)
       return;
     // add the pressed key to the current line
     currentLine += key;
@@ -62,7 +57,7 @@ void Terminal::Update(int key)
 void Terminal::Draw()
 {
   // draw a black background
-  DrawRectangleV(topLeft, (Vector2){(cols + 1) * fontSize * 0.8,(rows+0.1) * fontSize}, BLACK);
+  DrawRectangleV(topLeft, (Vector2){width,(rows+0.1) * fontSize}, BLACK);
   // store the history of the terminal
   std::queue<std::string> tmp(pastLines);
   // add the current line alongside the history
