@@ -8,42 +8,53 @@
 #include <stdio.h>
 #include <iomanip>
 
-typedef struct displayRoom
-{
-  int x;
-  int y;
-} DisplayRoom;
-
+// Store a state and identifier for doors between rooms.
+// Does not hold any identifying information for the rooms and position that this door is associated with
 class Door
 {
   public:
+    // Intended to be a 2 digit hexadecimal number, unique to this door
+    // However it may be any arbitrary string
     std::string name;
+    // The current state of this door
+    // TODO: May be open, closed, or changing state
     int state;
 
     Door();
+    // Construct a new, open door with a unique name
     Door(std::vector<Door*> otherDoors);
+    // Construct a door with the given parameters
     Door(std::string name, int state);
-    
-    std::string generateId();
+
+    // Generate a random 2 digit hexadecimal number
+    static std::string generateId();
 
   private:
-    int isUnique(std::vector<Door*> otherDoors, std::string id);
+    // Check if the given vector of Doors contains another door with the given id
+    static int isUnique(std::vector<Door*> otherDoors, std::string id);
 };
 
+// A node of a four-way linked list, with references to Doors for each path
+// a reference is stored for each cardinal direction, as well as an (x, y) position relative to the root node
 class Room
 {
   public:
+    // Rooms to the north, east, south, and west
     Room *n, *e, *s, *w;
+    // Doors associated with each room that may be stored
     Door *nDoor, *eDoor, *sDoor, *wDoor;
+    // position relative to the root node
     int x, y;
 
     Room();
     Room(int x, int y);
 };
 
+// Holds any handles allocation for a root node Room, alongside the ability to add new rooms and acces data
 class Ship
 {
   public:
+    // Rooms may be placed at cardinal directions to each other
     enum Directions
     {
       NORTH,
@@ -51,17 +62,23 @@ class Ship
       SOUTH,
       WEST
     };
+    // The root node of the rooms list
     Room *root;
+    // Stores references to all allocated Rooms and Doors, to be deleted alongside this ship
     std::vector<Room*> roomArena;
     std::vector<Door*> doorsArena;
+    //  Where should this be rendered
     Vector2 topLeft;
+    // Proportions for display
     int width;
     int height;
     Ship();
     Ship(Vector2 topLeft, int width, int height);
     ~Ship();
 
+    // add a new room from the given reference in the given direction (specified from the Directions enum)
     void addRoom(Room *stem, int direction);
-    // This might be improved eventually - but right now, it relies on rooms being placed correctly
+    // Display this ship. Automatically works out the size for square rooms to fit within the specified window
+    // Relies on the generated room layout being correct and 2-D (ie stacking rooms is undefined behaviour)
     void Draw();
 };

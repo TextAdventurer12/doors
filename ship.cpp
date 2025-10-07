@@ -1,5 +1,6 @@
 #include "ship.h"
 
+// Create a new room with default parameters
 Room::Room()
 {
   n = NULL;
@@ -14,6 +15,7 @@ Room::Room()
   y = 0;
 }
 
+// Create a new room at a given location relative to the root
 Room::Room(int x, int y)
 {
   n = NULL;
@@ -28,23 +30,26 @@ Room::Room(int x, int y)
   this->y = y;
 }
 
-
+// Create and initialise the memory for a new ship
 Ship::Ship()
 {
-  root = new Room(0, 0);
-  roomArena.push_back(root);
+  root = new Room(0, 0); // create a default root at (0, 0)
+  roomArena.push_back(root); // store reference to the root
 }
 
+// Clear all memory associated with this ship
 Ship::~Ship()
 {
-  for (Room *room : roomArena)
-    delete room;
+  for (Room *room : roomArena) // iterate through the vector of references
+    delete room; // delete each stored room
 }
 
+// Add a new room in a given direction from the provided stem
 void Ship::addRoom(Room *stem, int direction)
 {
-  int x = stem->x;
+  int x = stem->x; // fetch the (x, y) position of the stem
   int y = stem->y;
+  // find the (x, y) of this new room
   switch (direction)
   {
     case NORTH:
@@ -60,10 +65,13 @@ void Ship::addRoom(Room *stem, int direction)
       x--;
       break;
   }
+  // Allocate and store references to memory
   Room *newRoom = new Room(x, y);
   roomArena.push_back(newRoom);
   Door *door = new Door(doorsArena);
   doorsArena.push_back(door);
+  // Update references in the linked list depending on the direction of the new room
+  // Sets the references both in the stem Room and the newRoom
   switch (direction)
   {
     case NORTH:
@@ -98,25 +106,26 @@ void Ship::addRoom(Room *stem, int direction)
 
 Door::Door()
 {
+  // generate a random 2 digit hex code
   name = generateId();
-  state = 0;
+  state = 0; // open
 }
 
 Door::Door(std::vector<Door*> otherDoors)
 {
-  std::string id = generateId();
-  while (!isUnique(otherDoors, id))
+  std::string id = generateId(); // random 2 digit hex code
+  while (!isUnique(otherDoors, id)) // continue generating new random 2 digit hex codes until it is unique
     id = generateId();
-  name = id;
+  name = id; // store the name
   state = 0;
 }
 
 int Door::isUnique(std::vector<Door*> otherDoors, std::string id)
 {
-  for (Door *door : otherDoors)
-    if (door->name == id)
+  for (Door *door : otherDoors) // check every provided door
+    if (door->name == id) // if the given id is found - it is not unique
       return 0;
-  return 1;
+  return 1; // if it is not found, it is unique
 }
 
 Door::Door(std::string name, int state)
@@ -128,9 +137,9 @@ Door::Door(std::string name, int state)
 
 std::string Door::generateId()
 {
-  int id = rand() % 256;
+  int id = rand() % 256; // random number from 0x00 to 0xff
   std::stringstream stream;
-  stream << std::hex << id;
+  stream << std::hex << id; // store as a hex string
   return stream.str();
 }
 
@@ -139,16 +148,19 @@ Ship::Ship(Vector2 topLeft, int width, int height)
   this->topLeft = topLeft;
   this->width = width;
   this->height = height;
-  root = new Room(0, 0);
-  roomArena.push_back(root);
+  root = new Room(0, 0); // allocate memory
+  roomArena.push_back(root); // store reference
 }
 
 void Ship::Draw()
 {
-  int x_min = 1000;
-  int x_max = -1000;
-  int y_min = 1000;
-  int y_max = -1000;
+  // identify the bounds of the ship.
+  // a default value of 0 will function for all correctly built ships, which contain a (0, 0) room
+  // However if there is no (0, 0) room somehow, this will yield incorrect bounds and break rendering
+  int x_min = 0;
+  int x_max = 0;
+  int y_min = 0;
+  int y_max = 0;
   for (Room *room : roomArena)
   {
     x_min = std::min(x_min, room->x);
@@ -156,38 +168,50 @@ void Ship::Draw()
     x_max = std::max(x_max, room->x);
     y_max = std::max(y_max, room->y);
   }
+  // The dimensions of a rectangle that covers all rooms, along with one room of padding
   double x_count = x_max - x_min + 3;
   double y_count = y_max - y_min + 3;
- 
+
+  // split the width and height of the window into the number of rooms
   double r_width = width / x_count;
   double r_height = height / y_count;
+  // turn rooms into squares
+  r_width = std::min(r_width, r_height);
+  r_height = std::min(r_width, r_height);
 
+  // draw a black background
   DrawRectangle(topLeft.x, topLeft.y, width, height, BLACK);
- 
+
+  // draw each room individually
   for (Room *room : roomArena)
   {
     // generate a grid of cells, and draw the cells with rooms on top of them
     int x = (room->x - x_min + 1) * r_width + topLeft.x;
     int y = (room->y - y_min + 1) * r_height + topLeft.y;
 
+    // draw the walls of the room
     DrawRectangleLines(x, y, r_width, r_height, WHITE);
 
-    
-    
-
+    // Draw doors on this room
     if (room->nDoor)
     {
+      // the size of doors is dependant on the scale of rooms
       double d_width = r_width * 0.66;
       double d_height = r_height * 0.2;
+      // shift the door into the middle of the wall
       int x_door = x + (r_width - d_width) / 2;
       int y_door = y - d_height / 2;
+      // draw the door
       DrawRectangle(x_door, y_door, d_width, d_height, BLACK);
       DrawRectangleLines(x_door, y_door, d_width, d_height, WHITE);
+      // shift the door's text to the middle of the door
       int t_x = x + r_width/2 - d_height * 0.6;
       int t_y = y_door + d_height * 0.1;
+      // draw the door's name
       DrawText(room->nDoor->name.c_str(), t_x, t_y, d_height * 0.8, WHITE);
     }
 
+    // largely a duplifate of the north door display
     if (room->sDoor)
     {
       double d_width = r_width * 0.66;
@@ -216,6 +240,8 @@ void Ship::Draw()
       Vector2 pos = (Vector2){t_x, t_y};
       float spacing = d_width * 0.8 / 10;
       spacing = spacing < 1 ? 1 : spacing;
+      // rotate the displayed text on the door, to better fit inside the portrait rectangle
+      // TODO: swap to square doors, which will allow for right way up text regardless (fits with square rooms);
       DrawTextPro(ft, room->eDoor->name.c_str(), pos, (Vector2){0, 0}, 90, d_width * 0.8, spacing, WHITE);
     }
 
