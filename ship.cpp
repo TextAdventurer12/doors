@@ -71,6 +71,11 @@ void Ship::addRoom(Room *stem, int direction)
   y_min = std::min(y, y_min);
   y_max = std::max(y, y_max);
 
+  double x_count = x_max - x_min + 3;
+  double y_count = y_max - y_min + 3;
+
+  roomLength = std::min(width / x_count, height / y_count);
+  
   // Allocate and store references to memory
   Room *newRoom = new Room(x, y);
   roomArena.push_back(newRoom);
@@ -234,28 +239,14 @@ std::vector<Rectangle> Room::doorSpace()
   Rectangle north = { x + 0.3, y, nDoor ? 0.4 : 0, nDoor ? 0.4 : 0};
   Rectangle east  = { x + 0.6, y + 0.3, eDoor ? 0.4 : 0, eDoor ? 0.4 : 0};
   Rectangle south = { x + 0.3, y + 0.6, sDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
-  Rectangle west  = { x, y + 0.3,  wDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
+  Rectangle west  = { x, y + 0.3,  wDoor ? 0.4 : 0, wDoor ? 0.4 : 0};
   return std::vector<Rectangle> ({north, east, south, west});
 }
 
 Vector2 Ship::worldSpace(Vector2 roomSpace)
 {
-  // identify the bounds of the ship.
-  // a default value of 0 will function for all correctly built ships, which contain a (0, 0) room
-  // However if there is no (0, 0) room somehow, this will yield incorrect bounds and break rendering
-  // The dimensions of a rectangle that covers all rooms, along with one room of padding
-  double x_count = x_max - x_min + 3;
-  double y_count = y_max - y_min + 3;
-
-  // split the width and height of the window into the number of rooms
-  double r_width = width / x_count;
-  double r_height = height / y_count;
-  // turn rooms into squares
-  r_width = std::min(r_width, r_height);
-  r_height = std::min(r_width, r_height);
-
-  float x = (roomSpace.x - x_min + 1) * r_width + topLeft.x;
-  float y = (roomSpace.y - y_min + 1) * r_height + topLeft.y;
+  float x = (roomSpace.x - x_min + 1) * roomLength + topLeft.x;
+  float y = (roomSpace.y - y_min + 1) * roomLength + topLeft.y;
 
   return (Vector2) {x, y};
 }
@@ -266,4 +257,17 @@ Room *Ship::getRoom(int x, int y)
     if (room->x == x && room->y == y)
       return room;
   return NULL;
+}
+
+Vector2 Ship::roomSpace(Vector2 worldSpace)
+{
+  float x = (worldSpace.x - topLeft.x) / roomLength + x_min - 1;
+  float y = (worldSpace.y - topLeft.y) / roomLength + y_min - 1;
+
+  return (Vector2) {x, y};
+}
+
+double Ship::roomScale(double px)
+{
+  return px / roomLength;
 }

@@ -72,33 +72,44 @@ int main(int argc, char **argv)
     if (_floor(lastPos.y) != _floor(guyPos.y)) guyPos.y = lastPos.y;
 
     Room *currRoom = sh.getRoom(_floor(guyPos.x), _floor(guyPos.y));
-    if (0)
+    std::vector<Rectangle> worldDoors;
+    std::vector<Ship::Directions> dir;
+    if (currRoom)
     {
       std::vector<Rectangle> doors = currRoom->doorSpace();
-      printf("%f\n", doors[Ship::EAST].width);
-      printf("%d\n", CheckCollisionCircleRec(guyPos, guyRad, doors[Ship::EAST]));
+      for (int i = 0; i < doors.size(); i++)
+      {
+        Rectangle &rect = doors[i];
+        Vector2 pos = (Vector2){rect.x, rect.y};
+        pos = sh.worldSpace(pos);
+        std::string dirs[4] = {"NORTH", "EAST", "SOUTH", "WEST" };
+        printf("%s: %f, %f, %f, %f\n", dirs[i].c_str(), pos.x, pos.y, rect.width, rect.height);
+        Rectangle r = (Rectangle){pos.x, pos.y, rect.width, rect.height};
+        worldDoors.push_back(r);
+      }
 
-      if (CheckCollisionCircleRec(guyPos, guyRad, doors[Ship::NORTH]))
+      if (currRoom->nDoor && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::NORTH]))
       {
         guyPos.x = currRoom->n->x;
         guyPos.y = currRoom->n->y;
       }
-      if (CheckCollisionCircleRec(guyPos, guyRad, doors[Ship::EAST]))
+      else if (currRoom->eDoor && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::EAST]))
       {
         guyPos.x = currRoom->e->x;
         guyPos.y = currRoom->e->y;
       }
-      if (CheckCollisionCircleRec(guyPos, guyRad, doors[Ship::SOUTH]))
+      else if (currRoom->sDoor && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::SOUTH]))
       {
         guyPos.x = currRoom->s->x;
         guyPos.y = currRoom->s->y;
       }
-      if (CheckCollisionCircleRec(guyPos, guyRad, doors[Ship::WEST]))
+      else if (currRoom->nDoor && CheckCollisionCircleRec(guyPos, sh.roomScale(guyRad), doors[Ship::WEST]))
       {
         guyPos.x = currRoom->w->x;
         guyPos.y = currRoom->w->y;
-      }    }
-    
+      }
+    }
+   
     // if a command was input this frame
     if (ter.interrupt)
     {
@@ -116,6 +127,8 @@ int main(int argc, char **argv)
       ter.Draw();
       sh.Draw();
       DrawCircleV(sh.worldSpace(guyPos), guyRad, BLUE);
+      for (Rectangle r : worldDoors)
+        DrawRectangleRec(r, RED);
       
     EndDrawing();
   }

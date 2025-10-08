@@ -77,6 +77,8 @@ class Ship
     // Proportions for display
     int width;
     int height;
+    // the side length of a room in pixels
+    double roomLength;
     Ship();
     Ship(Vector2 topLeft, int width, int height);
     ~Ship();
@@ -90,6 +92,12 @@ class Ship
     // maps a point relative to a room to the point on the canvas
     // (0, 0) is the top left of the root, with the top lefts of other rooms placed at integer (x, y)
     Vector2 worldSpace(Vector2 roomSpace);
+
+    // inverse of worldSpace(roomSpace)
+    Vector2 roomSpace(Vector2 worldSpace);
+
+    // convert a length in pixels to a length in room widths
+    double roomScale(double px);
 
     Room *getRoom(int x, int y);
 
