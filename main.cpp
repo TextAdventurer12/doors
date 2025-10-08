@@ -33,26 +33,33 @@ int _floor(double x)
 
 int main(int argc, char **argv)
 {
-  const int screenWidth = 1920;
-  const int screenHeight = 1080;
+  InitWindow(1, 1, "raylib window");
 
-  InitWindow(screenWidth, screenHeight, "raylib window");
+  int monitor = GetCurrentMonitor();
+  ToggleBorderlessWindowed();
+  int screenWidth = GetMonitorWidth(monitor);
+  int screenHeight = GetMonitorHeight(monitor);
 
   SetTargetFPS(60);
 
+  int fontSize = std::min(screenWidth * 0.02, screenHeight * 0.03);
   // Create a terminal
-  Terminal ter = Terminal((Vector2){460, 675}, 1000, 10, 35);
+  Terminal ter = Terminal((Vector2){screenWidth * 0.25, screenHeight * 0.7}, screenWidth * 0.5, screenHeight * 0.25, fontSize);
   // Create a ship and construct rooms
-  Ship sh = Ship((Vector2){660, 50}, 600, 600);
+  Ship sh = Ship((Vector2){screenWidth * 0.3, screenHeight * 0.05}, screenWidth * 0.4, screenHeight * 0.6);
   sh.addRoom(sh.root, Ship::NORTH);
   sh.addRoom(sh.getRoom(0, -1), Ship::EAST);
   sh.addRoom(sh.getRoom(1, -1), Ship::EAST);
   sh.addRoom(sh.getRoom(2, -1), Ship::SOUTH);
+  sh.addRoom(sh.getRoom(0, 0) , Ship::SOUTH);
+  // Create a terminal instance for logging results
+  // This instance shouldn't take keyboard input, to ensure that it's output only
+  Terminal log = Terminal((Vector2){screenWidth * 0.75, screenHeight * 0.05}, screenWidth * 0.2, screenHeight * 0.6, fontSize);
 
 
   Vector2 guyPos = (Vector2) { 0.5, 0.5};
   float guyRad = 20;
-  float guySpeed = 0.1;
+  float guySpeed = 0.01;
 
   while (!WindowShouldClose())
   {
@@ -91,23 +98,19 @@ int main(int argc, char **argv)
 
       if      (currRoom->nDoor && currRoom->nDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::NORTH]))
       {
-        guyPos.x = currRoom->n->x + 0.5;
-        guyPos.y = currRoom->n->y + 0.5;
+        guyPos.y = currRoom->n->y + 0.6;
       }
       else if (currRoom->eDoor && currRoom->eDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::EAST]))
       {
-        guyPos.x = currRoom->e->x + 0.5;
-        guyPos.y = currRoom->e->y + 0.5;
+        guyPos.x = currRoom->e->x + 0.4;
       }
       else if (currRoom->sDoor && currRoom->sDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::SOUTH]))
       {
-        guyPos.x = currRoom->s->x + 0.5;
-        guyPos.y = currRoom->s->y + 0.5;
+        guyPos.y = currRoom->s->y + 0.4;
       }
       else if (currRoom->wDoor && currRoom->wDoor->state == Door::OPEN && CheckCollisionCircleRec(guyPos, sh.roomScale(guyRad), doors[Ship::WEST]))
       {
-        guyPos.x = currRoom->w->x + 0.5;
-        guyPos.y = currRoom->w->y + 0.5;
+        guyPos.x = currRoom->w->x + 0.6;
       }
     }
    
@@ -118,7 +121,7 @@ int main(int argc, char **argv)
       std::vector<std::string> components = split(ter.command, " ");
       // pass off and process the Command
       Command cmd = Command(components);
-      cmd.Process(ter, sh);
+      cmd.Process(ter, sh, log);
     }
     
     BeginDrawing();
@@ -127,6 +130,7 @@ int main(int argc, char **argv)
       // Display the terminal and ship
       ter.Draw();
       sh.Draw();
+      log.Draw();
       DrawCircleV(sh.worldSpace(guyPos), guyRad, BLUE);
       
     EndDrawing();

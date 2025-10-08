@@ -4,11 +4,12 @@ Terminal::Terminal()
 {
 }
 
-Terminal::Terminal(Vector2 topLeft, int width, int rows, int fontSize)
+Terminal::Terminal(Vector2 topLeft, int width, int height, int fontSize)
 {
   this->topLeft = topLeft;
   this->width = width;
-  this->rows = rows;
+  this->height = height;
+  this->rows = height / fontSize;
   this->fontSize = fontSize;
   currentLine = "";
   interrupt = 0;

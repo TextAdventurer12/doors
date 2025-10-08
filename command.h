@@ -26,8 +26,8 @@ class Command
     Command();
     // Construct a new command from the given arguments, with the first argument being used to identify the type of command
     Command(std::vector<std::string> arguments);
-    // Process a command and pass its output into target or effect ship
-    void Process(Terminal &target, Ship &ship);
+    // Process a command and pass its output into the relevant consequence
+    void Process(Terminal &target, Ship &ship, Terminal &log);
 
     // Process a command of type TYPE_NONE
     void ProcessNone(Terminal &target);
@@ -36,7 +36,7 @@ class Command
     // Process a command of type TYPE_ECHO
     void ProcessEcho(Terminal &target);
     // Process a command of type TYPE_DOOR
-    void ProcessDoor(Ship &ship);
+    void ProcessDoor(Ship &ship, Terminal &log);
   private:
     static int isCode(std::string name);
 };

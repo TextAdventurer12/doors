@@ -49,7 +49,7 @@ int Command::isCode(std::string name)
 }
 
 
-void Command::Process(Terminal &target, Ship &ship)
+void Command::Process(Terminal &target, Ship &ship, Terminal &log)
 {
   // Logic performed depends on the type of the command
   // Check for type and pass off to other Process functions for each type
@@ -68,7 +68,7 @@ void Command::Process(Terminal &target, Ship &ship)
        break;
 
       case TYPE_DOOR:
-        ProcessDoor(ship);
+        ProcessDoor(ship, log);
         break;
   }
   return;
@@ -91,12 +91,24 @@ void Command::ProcessEcho(Terminal &target)
     target.WriteLine(str); // repeat on a new line
 }
 
-void Command::ProcessDoor(Ship &target)
+void Command::ProcessDoor(Ship &target, Terminal &log)
 {
   for (Door *door : target.doorsArena)
   {
     if (door->name == arguments[0])
     {
+      if (door->state == Door::CLOSED)
+      {
+        char buf[16];
+        snprintf(buf, 16, "OPENED: %s", door->name.c_str());
+        log.WriteLine(buf);
+      }
+      if (door->state == Door::OPEN)
+      {
+        char buf[16];
+        snprintf(buf, 16, "CLOSED: %s", door->name.c_str());
+        log.WriteLine(buf);
+      }
       door->state = !door->state;
       return;
     }

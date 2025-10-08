@@ -9,7 +9,7 @@ class Terminal
   public:
     Terminal();
 // create a new terminal with some default parameters
-    Terminal(Vector2 topLeft, int width, int rows, int fontSize);
+    Terminal(Vector2 topLeft, int width, int height, int fontSize);
     // update the terminal each frame. Involves a check for newly inputted keys (if two keys are pressed on the same frame one is lost)
     void Update(int key);
     // draw the terminal to the screen, displaying at the specified position with the contents of pastLines and currentLine
@@ -27,6 +27,7 @@ class Terminal
     std::queue<std::string> pastLines;
     std::string currentLine;
     int width;
+    int height;
     int rows;
     int fontSize;
 };
