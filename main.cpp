@@ -41,11 +41,14 @@ int main(int argc, char **argv)
   SetTargetFPS(60);
 
   // Create a terminal
-  Terminal ter = Terminal((Vector2){100, 700}, 800, 5, 35);
+  Terminal ter = Terminal((Vector2){460, 675}, 1000, 10, 35);
   // Create a ship and construct rooms
-  Ship sh = Ship((Vector2){100, 50}, 800, 600);
+  Ship sh = Ship((Vector2){660, 50}, 600, 600);
   sh.addRoom(sh.root, Ship::NORTH);
-  sh.addRoom(sh.root->n, Ship::EAST);
+  sh.addRoom(sh.getRoom(0, -1), Ship::EAST);
+  sh.addRoom(sh.getRoom(1, -1), Ship::EAST);
+  sh.addRoom(sh.getRoom(2, -1), Ship::SOUTH);
+
 
   Vector2 guyPos = (Vector2) { 0.5, 0.5};
   float guyRad = 20;
@@ -73,7 +76,7 @@ int main(int argc, char **argv)
 
     Room *currRoom = sh.getRoom(_floor(guyPos.x), _floor(guyPos.y));
     std::vector<Rectangle> worldDoors;
-    std::vector<Ship::Directions> dir;
+    std::vector<Ship::Direction> dir;
     if (currRoom)
     {
       std::vector<Rectangle> doors = currRoom->doorSpace();
@@ -82,31 +85,29 @@ int main(int argc, char **argv)
         Rectangle &rect = doors[i];
         Vector2 pos = (Vector2){rect.x, rect.y};
         pos = sh.worldSpace(pos);
-        std::string dirs[4] = {"NORTH", "EAST", "SOUTH", "WEST" };
-        printf("%s: %f, %f, %f, %f\n", dirs[i].c_str(), pos.x, pos.y, rect.width, rect.height);
-        Rectangle r = (Rectangle){pos.x, pos.y, rect.width, rect.height};
-        worldDoors.push_back(r);
+        Rectangle r = (Rectangle){pos.x, pos.y, sh.roomLength * rect.width, sh.roomLength * rect.height};
+        //worldDoors.push_back(r);
       }
 
-      if (currRoom->nDoor && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::NORTH]))
+      if      (currRoom->nDoor && currRoom->nDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::NORTH]))
       {
-        guyPos.x = currRoom->n->x;
-        guyPos.y = currRoom->n->y;
+        guyPos.x = currRoom->n->x + 0.5;
+        guyPos.y = currRoom->n->y + 0.5;
       }
-      else if (currRoom->eDoor && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::EAST]))
+      else if (currRoom->eDoor && currRoom->eDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::EAST]))
       {
-        guyPos.x = currRoom->e->x;
-        guyPos.y = currRoom->e->y;
+        guyPos.x = currRoom->e->x + 0.5;
+        guyPos.y = currRoom->e->y + 0.5;
       }
-      else if (currRoom->sDoor && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::SOUTH]))
+      else if (currRoom->sDoor && currRoom->sDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::SOUTH]))
       {
-        guyPos.x = currRoom->s->x;
-        guyPos.y = currRoom->s->y;
+        guyPos.x = currRoom->s->x + 0.5;
+        guyPos.y = currRoom->s->y + 0.5;
       }
-      else if (currRoom->nDoor && CheckCollisionCircleRec(guyPos, sh.roomScale(guyRad), doors[Ship::WEST]))
+      else if (currRoom->wDoor && currRoom->wDoor->state == Door::OPEN && CheckCollisionCircleRec(guyPos, sh.roomScale(guyRad), doors[Ship::WEST]))
       {
-        guyPos.x = currRoom->w->x;
-        guyPos.y = currRoom->w->y;
+        guyPos.x = currRoom->w->x + 0.5;
+        guyPos.y = currRoom->w->y + 0.5;
       }
     }
    
@@ -127,8 +128,6 @@ int main(int argc, char **argv)
       ter.Draw();
       sh.Draw();
       DrawCircleV(sh.worldSpace(guyPos), guyRad, BLUE);
-      for (Rectangle r : worldDoors)
-        DrawRectangleRec(r, RED);
       
     EndDrawing();
   }

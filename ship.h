@@ -14,6 +14,12 @@
 class Door
 {
   public:
+    enum State
+    {
+      CLOSED,
+      OPEN,
+      OPENING
+    };
     // Intended to be a 2 digit hexadecimal number, unique to this door
     // However it may be any arbitrary string
     std::string name;
@@ -60,7 +66,7 @@ class Ship
 {
   public:
     // Rooms may be placed at cardinal directions to each other
-    enum Directions
+    enum Direction
     {
       NORTH,
       EAST,
@@ -85,6 +91,8 @@ class Ship
 
     // add a new room from the given reference in the given direction (specified from the Directions enum)
     void addRoom(Room *stem, int direction);
+    // Create a door at the specified direction to link the two provided rooms
+    void linkRooms(Room *a, Room *b, Direction aDir, Direction bDir);
     // Display this ship. Automatically works out the size for square rooms to fit within the specified window
     // Relies on the generated room layout being correct and 2-D (ie stacking rooms is undefined behaviour)
     void Draw();

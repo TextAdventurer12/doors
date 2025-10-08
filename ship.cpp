@@ -226,7 +226,7 @@ void Ship::DrawDoor(Door *door, int x, int y, int height, int width)
 {
   int fontSize = height * 0.7;
   DrawRectangle(x, y, width, height, BLACK);
-  DrawRectangleLines(x, y, width, height, door->state ? RED : GREEN);
+  DrawRectangleLines(x, y, width, height, door->state == Door::CLOSED ? RED : GREEN);
   int t_width = MeasureText(door->name.c_str(), fontSize);
   int t_x = x + width/2 - t_width / 2;
   int t_y = y + (height - fontSize)/2;
@@ -236,10 +236,10 @@ void Ship::DrawDoor(Door *door, int x, int y, int height, int width)
 
 std::vector<Rectangle> Room::doorSpace()
 {
-  Rectangle north = { x + 0.3, y, nDoor ? 0.4 : 0, nDoor ? 0.4 : 0};
-  Rectangle east  = { x + 0.6, y + 0.3, eDoor ? 0.4 : 0, eDoor ? 0.4 : 0};
-  Rectangle south = { x + 0.3, y + 0.6, sDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
-  Rectangle west  = { x, y + 0.3,  wDoor ? 0.4 : 0, wDoor ? 0.4 : 0};
+  Rectangle north = { x + 0.3, y - 0.2, nDoor ? 0.4 : 0, nDoor ? 0.4 : 0};
+  Rectangle east  = { x + 0.8, y + 0.2, eDoor ? 0.4 : 0, eDoor ? 0.4 : 0};
+  Rectangle south = { x + 0.3, y + 0.8, sDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
+  Rectangle west  = { x - 0.2, y + 0.2, wDoor ? 0.4 : 0, wDoor ? 0.4 : 0};
   return std::vector<Rectangle> ({north, east, south, west});
 }
 
@@ -270,4 +270,40 @@ Vector2 Ship::roomSpace(Vector2 worldSpace)
 double Ship::roomScale(double px)
 {
   return px / roomLength;
+}
+
+void Ship::linkRooms(Room *a, Room *b, Direction aDir, Direction bDir)
+{
+  Door *connector = new Door(doorsArena);
+  doorsArena.push_back(connector);
+  switch (aDir)
+  {
+    case NORTH:
+      a->nDoor = connector;
+      break;
+    case EAST:
+      a->eDoor = connector;
+      break;
+    case SOUTH:
+      a->sDoor = connector;
+      break;
+    case WEST:
+      a->wDoor = connector;
+      break;
+  }
+  switch (bDir)
+  {
+    case NORTH:
+      b->nDoor = connector;
+      break;
+    case EAST:
+      b->eDoor = connector;
+      break;
+    case SOUTH:
+      b->sDoor = connector;
+      break;
+    case WEST:
+      b->wDoor = connector;
+      break;
+  }
 }
