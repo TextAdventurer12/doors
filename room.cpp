@@ -59,3 +59,27 @@ int Room::sameRoom(Vector2 a, Vector2 b)
   
   return (r_a.x == r_b.x) && (r_a.y == r_b.y);
 }
+int Room::directionTo(Room *room)
+{
+  if (n == room)
+    return 0;
+  if (e == room)
+    return 1;
+  if (s == room)
+    return 2;
+  if (w == room)
+    return 3;
+  return -1;
+}
+Door *Room::doorTo(Room *room)
+{
+  if (n == room)
+    return nDoor;
+  if (e == room)
+    return eDoor;
+  if (s == room)
+    return sDoor;
+  if (w == room)
+    return wDoor;
+  return NULL;
+}

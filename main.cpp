@@ -44,9 +44,11 @@ int main(int argc, char **argv)
   // Create a ship and construct rooms
   Ship sh = Ship((Vector2){screenWidth * 0.3f, screenHeight * 0.05f}, screenWidth * 0.4, screenHeight * 0.6);
   sh.addRoom(sh.root, Ship::NORTH);
-  sh.addRoom(sh.getRoom(0, -1), Ship::EAST);
-  sh.addRoom(sh.getRoom(1, -1), Ship::EAST);
-  sh.addRoom(sh.getRoom(2, -1), Ship::SOUTH);
+  //sh.addRoom(sh.getRoom(0, -1), Ship::EAST);
+  //sh.addRoom(sh.getRoom(1, -1), Ship::EAST);
+  //sh.addRoom(sh.getRoom(2, -1), Ship::SOUTH);
+  sh.linkRooms(sh.getRoom(0, 0), sh.getRoom(0, 0), Ship::EAST, Ship::WEST);
+  sh.linkRooms(sh.getRoom(0, 0), sh.getRoom(0, -1), Ship::SOUTH, Ship::NORTH);
   // Create a terminal instance for logging results
   // This instance shouldn't take keyboard input, to ensure that it's output only
   Terminal log = Terminal((Vector2){screenWidth * 0.75f, screenHeight * 0.05f}, screenWidth * 0.2, screenHeight * 0.6, fontSize);
@@ -90,21 +92,32 @@ int main(int argc, char **argv)
         //worldDoors.push_back(r);
       }
 
+      Room *newRoom = NULL;
+
       if      (currRoom->nDoor && currRoom->nDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::NORTH]))
-      {
-        guyPos.y = currRoom->n->y + 0.6;
-      }
+        newRoom = currRoom->n;
       else if (currRoom->eDoor && currRoom->eDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::EAST]))
-      {
-        guyPos.x = currRoom->e->x + 0.4;
-      }
+        newRoom = currRoom->e;
       else if (currRoom->sDoor && currRoom->sDoor->state == Door::OPEN && CheckCollisionCircleRec((guyPos), sh.roomScale(guyRad), doors[Ship::SOUTH]))
-      {
-        guyPos.y = currRoom->s->y + 0.4;
-      }
+        newRoom = currRoom->s;
       else if (currRoom->wDoor && currRoom->wDoor->state == Door::OPEN && CheckCollisionCircleRec(guyPos, sh.roomScale(guyRad), doors[Ship::WEST]))
+        newRoom = currRoom->w;
+
+      int dir = newRoom ? newRoom->directionTo(currRoom) : -1;
+      switch (dir)
       {
-        guyPos.x = currRoom->w->x + 0.6;
+        case Ship::NORTH:
+          guyPos.y = newRoom->y + 0.6;
+          break;
+        case Ship::EAST:
+          guyPos.x = newRoom->x + 0.4;
+          break;
+        case Ship::SOUTH:
+          guyPos.y = newRoom->y + 0.4;
+          break;
+        case Ship::WEST:
+          guyPos.x = newRoom->x + 0.6;
+          break;
       }
     }
    

@@ -206,30 +206,38 @@ void Ship::linkRooms(Room *a, Room *b, Direction aDir, Direction bDir)
   {
     case NORTH:
       a->nDoor = connector;
+      a->n = b;
       break;
     case EAST:
       a->eDoor = connector;
+      a->e = b;
       break;
     case SOUTH:
       a->sDoor = connector;
+      a->s = b;
       break;
     case WEST:
       a->wDoor = connector;
+      a->w = b;
       break;
   }
   switch (bDir)
   {
     case NORTH:
       b->nDoor = connector;
+      b->n = a;
       break;
     case EAST:
       b->eDoor = connector;
+      b->e = a;
       break;
     case SOUTH:
       b->sDoor = connector;
+      b->s = a;
       break;
     case WEST:
       b->wDoor = connector;
+      b->w = a;
       break;
   }
 }

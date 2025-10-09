@@ -22,6 +22,12 @@ class Room
     // the direction is mapped to doorSpace[Directions]
     std::vector<Rectangle> doorSpace();
 
+    // returns the door that leads to the given room
+    Door *doorTo(Room *room);
+
+    // returns the direction to given room
+    int directionTo(Room *room);
+
     // Get the (x, y) index of the room which contains the position
     static Vector2 roomLocation(Vector2 pos);
 
