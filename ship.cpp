@@ -1,35 +1,5 @@
 #include "ship.h"
 
-// Create a new room with default parameters
-Room::Room()
-{
-  n = NULL;
-  e = NULL;
-  s = NULL;
-  w = NULL;
-  nDoor = NULL;
-  eDoor = NULL;
-  sDoor = NULL;
-  wDoor = NULL;
-  x = 0;
-  y = 0;
-}
-
-// Create a new room at a given location relative to the root
-Room::Room(int x, int y)
-{
-  n = NULL;
-  e = NULL;
-  s = NULL;
-  w = NULL;
-  nDoor = NULL;
-  eDoor = NULL;
-  sDoor = NULL;
-  wDoor = NULL;
-  this->x = x;
-  this->y = y;
-}
-
 // Create and initialise the memory for a new ship
 Ship::Ship()
 {
@@ -115,47 +85,6 @@ void Ship::addRoom(Room *stem, int direction)
   }
 }
 
-Door::Door()
-{
-  // generate a random 2 digit hex code
-  name = generateId();
-  state = 0; // open
-}
-
-Door::Door(std::vector<Door*> otherDoors)
-{
-  std::string id = generateId(); // random 2 digit hex code
-  while (!isUnique(otherDoors, id)) // continue generating new random 2 digit hex codes until it is unique
-    id = generateId();
-  name = id; // store the name
-  state = 0;
-}
-
-int Door::isUnique(std::vector<Door*> otherDoors, std::string id)
-{
-  for (Door *door : otherDoors) // check every provided door
-    if (door->name == id) // if the given id is found - it is not unique
-      return 0;
-  return 1; // if it is not found, it is unique
-}
-
-Door::Door(std::string name, int state)
-{
-  this->name = name;
-  this->state = state;
-}
-
-
-std::string Door::generateId()
-{
-  int id = rand() % 256; // random number from 0x00 to 0xff
-  std::stringstream stream;
-  stream << std::hex << id; // store as a hex string
-  std::string str = stream.str();
-  for (char &ch : str) ch = ch + (ch >= 'a' && ch <= 'z' ? 'A' - 'a' : 0);
-  return str;
-}
-
 Ship::Ship(Vector2 topLeft, int width, int height)
 {
   this->topLeft = topLeft;
@@ -234,15 +163,6 @@ void Ship::DrawDoor(Door *door, int x, int y, int height, int width)
 }
 
 
-std::vector<Rectangle> Room::doorSpace()
-{
-  Rectangle north = { x + 0.3f, y - 0.2f, nDoor ? 0.4f : 0, nDoor ? 0.4f : 0};
-  Rectangle east  = { x + 0.8f, y + 0.2f, eDoor ? 0.4f : 0, eDoor ? 0.4f : 0};
-  Rectangle south = { x + 0.3f, y + 0.8f, sDoor ? 0.4f : 0, sDoor ? 0.4f : 0};
-  Rectangle west  = { x - 0.2f, y + 0.2f, wDoor ? 0.4f : 0, wDoor ? 0.4f : 0};
-  return std::vector<Rectangle> ({north, east, south, west});
-}
-
 Vector2 Ship::worldSpace(Vector2 roomSpace)
 {
   float x = (roomSpace.x - x_min + 1) * roomLength + topLeft.x;
@@ -314,21 +234,3 @@ void Ship::linkRooms(Room *a, Room *b, Direction aDir, Direction bDir)
   }
 }
 
-int Room::_floor(float x)
-{
-  if (x == (float)(int)x) return x;
-  return x > 0 ? (int)x : (int)(x - 1);
-}
-
-Vector2 Room::roomLocation(Vector2 pos)
-{
-  return (Vector2){(float)_floor(pos.x), (float)_floor(pos.y)};
-}
-
-int Room::sameRoom(Vector2 a, Vector2 b)
-{
-  Vector2 r_a = roomLocation(a);
-  Vector2 r_b = roomLocation(b);
-  
-  return (r_a.x == r_b.x) && (r_a.y == r_b.y);
-}
