@@ -33,13 +33,15 @@ int _floor(double x)
 
 int main(int argc, char **argv)
 {
-  InitWindow(1, 1, "raylib window");
+  InitWindow(100, 100, "raylib window");
+  
+  int screenWidth = GetMonitorWidth(0);
+  int screenHeight = GetMonitorHeight(0);
 
-  int monitor = GetCurrentMonitor();
-  ToggleBorderlessWindowed();
-  int screenWidth = GetMonitorWidth(monitor);
-  int screenHeight = GetMonitorHeight(monitor);
+  SetWindowSize(screenWidth, screenHeight);
 
+  ToggleFullscreen();
+  
   SetTargetFPS(60);
 
   int fontSize = std::min(screenWidth * 0.02, screenHeight * 0.03);
@@ -51,7 +53,6 @@ int main(int argc, char **argv)
   sh.addRoom(sh.getRoom(0, -1), Ship::EAST);
   sh.addRoom(sh.getRoom(1, -1), Ship::EAST);
   sh.addRoom(sh.getRoom(2, -1), Ship::SOUTH);
-  sh.addRoom(sh.getRoom(0, 0) , Ship::SOUTH);
   // Create a terminal instance for logging results
   // This instance shouldn't take keyboard input, to ensure that it's output only
   Terminal log = Terminal((Vector2){screenWidth * 0.75, screenHeight * 0.05}, screenWidth * 0.2, screenHeight * 0.6, fontSize);
