@@ -58,7 +58,7 @@ void Terminal::Update(int key)
 void Terminal::Draw()
 {
   // draw a black background
-  DrawRectangleV(topLeft, (Vector2){width,(rows+0.1) * fontSize}, BLACK);
+  DrawRectangleV(topLeft, (Vector2){(float)width,(rows+0.1f) * fontSize}, BLACK);
   // store the history of the terminal
   std::queue<std::string> tmp(pastLines);
   // add the current line alongside the history

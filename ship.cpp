@@ -71,8 +71,8 @@ void Ship::addRoom(Room *stem, int direction)
   y_min = std::min(y, y_min);
   y_max = std::max(y, y_max);
 
-  double x_count = x_max - x_min + 3;
-  double y_count = y_max - y_min + 3;
+  float x_count = x_max - x_min + 3;
+  float y_count = y_max - y_min + 3;
 
   roomLength = std::min(width / x_count, height / y_count);
   
@@ -181,15 +181,15 @@ void Ship::Draw()
   // draw each room individually
   for (Room *room : roomArena)
   {
-    Vector2 pos = worldSpace((Vector2){room->x, room->y});
+    Vector2 pos = worldSpace((Vector2){(float)room->x, (float)room->y});
     int x = pos.x;
     int y = pos.y;
 
     // draw the walls of the room
     DrawRectangleLines(pos.x, pos.y, r_width, r_height, WHITE);
 
-    double d_width = r_width * 0.4;
-    double d_height = r_height * 0.4;
+    float d_width = r_width * 0.4f;
+    float d_height = r_height * 0.4f;
     
     // Draw doors on this room
     if (room->nDoor)
@@ -236,10 +236,10 @@ void Ship::DrawDoor(Door *door, int x, int y, int height, int width)
 
 std::vector<Rectangle> Room::doorSpace()
 {
-  Rectangle north = { x + 0.3, y - 0.2, nDoor ? 0.4 : 0, nDoor ? 0.4 : 0};
-  Rectangle east  = { x + 0.8, y + 0.2, eDoor ? 0.4 : 0, eDoor ? 0.4 : 0};
-  Rectangle south = { x + 0.3, y + 0.8, sDoor ? 0.4 : 0, sDoor ? 0.4 : 0};
-  Rectangle west  = { x - 0.2, y + 0.2, wDoor ? 0.4 : 0, wDoor ? 0.4 : 0};
+  Rectangle north = { x + 0.3f, y - 0.2f, nDoor ? 0.4f : 0, nDoor ? 0.4f : 0};
+  Rectangle east  = { x + 0.8f, y + 0.2f, eDoor ? 0.4f : 0, eDoor ? 0.4f : 0};
+  Rectangle south = { x + 0.3f, y + 0.8f, sDoor ? 0.4f : 0, sDoor ? 0.4f : 0};
+  Rectangle west  = { x - 0.2f, y + 0.2f, wDoor ? 0.4f : 0, wDoor ? 0.4f : 0};
   return std::vector<Rectangle> ({north, east, south, west});
 }
 
@@ -259,6 +259,11 @@ Room *Ship::getRoom(int x, int y)
   return NULL;
 }
 
+Room *Ship::getRoom(Vector2 pos)
+{
+  return getRoom(pos.x, pos.y);
+}
+
 Vector2 Ship::roomSpace(Vector2 worldSpace)
 {
   float x = (worldSpace.x - topLeft.x) / roomLength + x_min - 1;
@@ -267,7 +272,7 @@ Vector2 Ship::roomSpace(Vector2 worldSpace)
   return (Vector2) {x, y};
 }
 
-double Ship::roomScale(double px)
+float Ship::roomScale(float px)
 {
   return px / roomLength;
 }
@@ -306,4 +311,23 @@ void Ship::linkRooms(Room *a, Room *b, Direction aDir, Direction bDir)
       b->wDoor = connector;
       break;
   }
+}
+
+int Room::_floor(float x)
+{
+  if (x == (float)(int)x) return x;
+  return x > 0 ? (int)x : (int)(x - 1);
+}
+
+Vector2 Room::roomLocation(Vector2 pos)
+{
+  return (Vector2){(float)_floor(pos.x), (float)_floor(pos.y)};
+}
+
+int Room::sameRoom(Vector2 a, Vector2 b)
+{
+  Vector2 r_a = roomLocation(a);
+  Vector2 r_b = roomLocation(b);
+  
+  return (r_a.x == r_b.x) && (r_a.y == r_b.y);
 }

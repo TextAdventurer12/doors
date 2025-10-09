@@ -59,6 +59,14 @@ class Room
     // returns four rectangles to represent the collision boxes of doors in each direction
     // the direction is mapped to doorSpace[Directions]
     std::vector<Rectangle> doorSpace();
+
+    // Get the (x, y) index of the room which contains the position
+    static Vector2 roomLocation(Vector2 pos);
+
+    // returns if the two positions are in the same room
+    static int sameRoom(Vector2 a, Vector2 b);
+  private:
+    static int _floor(float x);
 };
 
 // Holds any handles allocation for a root node Room, alongside the ability to add new rooms and acces data
@@ -84,7 +92,7 @@ class Ship
     int width;
     int height;
     // the side length of a room in pixels
-    double roomLength;
+    float roomLength;
     Ship();
     Ship(Vector2 topLeft, int width, int height);
     ~Ship();
@@ -105,9 +113,10 @@ class Ship
     Vector2 roomSpace(Vector2 worldSpace);
 
     // convert a length in pixels to a length in room widths
-    double roomScale(double px);
+    float roomScale(float px);
 
     Room *getRoom(int x, int y);
+    Room *getRoom(Vector2 pos);
 
   private:
     void DrawDoor(Door *door, int x, int y, int height, int width);

@@ -23,12 +23,6 @@ std::vector<std::string> split(std::string str, std::string delimeter)
   return tokens;
 }
 
-int _floor(double x)
-{
-  if (x == (double)(int)x) return x;
-  return x > 0 ? (int)x : (int)(x - 1);
-}
-
 // TODO: implement enemies & pathfinding
 
 int main(int argc, char **argv)
@@ -46,16 +40,16 @@ int main(int argc, char **argv)
 
   int fontSize = std::min(screenWidth * 0.02, screenHeight * 0.03);
   // Create a terminal
-  Terminal ter = Terminal((Vector2){screenWidth * 0.25, screenHeight * 0.7}, screenWidth * 0.5, screenHeight * 0.25, fontSize);
+  Terminal ter = Terminal((Vector2){screenWidth * 0.25f, screenHeight * 0.7f}, screenWidth * 0.5, screenHeight * 0.25, fontSize);
   // Create a ship and construct rooms
-  Ship sh = Ship((Vector2){screenWidth * 0.3, screenHeight * 0.05}, screenWidth * 0.4, screenHeight * 0.6);
+  Ship sh = Ship((Vector2){screenWidth * 0.3f, screenHeight * 0.05f}, screenWidth * 0.4, screenHeight * 0.6);
   sh.addRoom(sh.root, Ship::NORTH);
   sh.addRoom(sh.getRoom(0, -1), Ship::EAST);
   sh.addRoom(sh.getRoom(1, -1), Ship::EAST);
   sh.addRoom(sh.getRoom(2, -1), Ship::SOUTH);
   // Create a terminal instance for logging results
   // This instance shouldn't take keyboard input, to ensure that it's output only
-  Terminal log = Terminal((Vector2){screenWidth * 0.75, screenHeight * 0.05}, screenWidth * 0.2, screenHeight * 0.6, fontSize);
+  Terminal log = Terminal((Vector2){screenWidth * 0.75f, screenHeight * 0.05f}, screenWidth * 0.2, screenHeight * 0.6, fontSize);
 
 
   Vector2 guyPos = (Vector2) { 0.5, 0.5};
@@ -79,10 +73,9 @@ int main(int argc, char **argv)
     if (IsKeyDown(KEY_DOWN))
       guyPos.y += guySpeed;
 
-    if (_floor(lastPos.x) != _floor(guyPos.x)) guyPos.x = lastPos.x;
-    if (_floor(lastPos.y) != _floor(guyPos.y)) guyPos.y = lastPos.y;
+    if (Room::sameRoom(lastPos, guyPos)) guyPos = lastPos;
 
-    Room *currRoom = sh.getRoom(_floor(guyPos.x), _floor(guyPos.y));
+    Room *currRoom = sh.getRoom(guyPos);
     std::vector<Rectangle> worldDoors;
     std::vector<Ship::Direction> dir;
     if (currRoom)
