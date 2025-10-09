@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     if (IsKeyDown(KEY_DOWN))
       guyPos.y += guySpeed;
 
-    if (Room::sameRoom(lastPos, guyPos)) guyPos = lastPos;
+    if (!Room::sameRoom(lastPos, guyPos)) guyPos = lastPos;
 
     Room *currRoom = sh.getRoom(guyPos);
     std::vector<Rectangle> worldDoors;

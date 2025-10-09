@@ -261,7 +261,8 @@ Room *Ship::getRoom(int x, int y)
 
 Room *Ship::getRoom(Vector2 pos)
 {
-  return getRoom(pos.x, pos.y);
+  Vector2 rPos = Room::roomLocation(pos);
+  return getRoom(rPos.x, rPos.y);
 }
 
 Vector2 Ship::roomSpace(Vector2 worldSpace)
